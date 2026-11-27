@@ -59,10 +59,9 @@ fun attemptAutoSignIn(
         return
     }
     val clientId = try {
-        context.getString(R.string.default_web_client_id)
+      context.getString(R.string.default_web_client_id)
     } catch (_: Exception) {
-        onUnauthenticated()
-        return
+      ""
     }
     val googleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(true)
