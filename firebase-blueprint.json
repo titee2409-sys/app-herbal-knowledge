@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "HerbalFormula": {
+      "title": "HerbalFormula",
+      "description": "User-authored or cloned Thai herbal medicine formula stored in the user's personal cloud database.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Thai herbal formula name (e.g., ยาตรีผลา)."
+        },
+        "englishName": {
+          "type": "string",
+          "description": "Optional English or transliterated name."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["RESPIRATORY", "DIGESTIVE", "FEVER", "TONIC", "MUSCLE", "WOMENS_HEALTH", "CUSTOM"],
+          "description": "Therapeutic body system category."
+        },
+        "tasteProfile": {
+          "type": "string",
+          "description": "Thai traditional medicine taste profile (รสยา)."
+        },
+        "indications": {
+          "type": "string",
+          "description": "Therapeutic properties and indications (สรรพคุณ)."
+        },
+        "ingredientsSummary": {
+          "type": "string",
+          "description": "Herbal ingredients and proportions (ส่วนประกอบและอัตราส่วน)."
+        },
+        "preparationAndDosage": {
+          "type": "string",
+          "description": "Preparation method and dosage instructions (วิธีใช้และขนาดรับประทาน)."
+        },
+        "precautions": {
+          "type": "string",
+          "description": "Contraindications and precautions (ข้อห้ามใช้และข้อควรระวัง)."
+        },
+        "referenceSource": {
+          "type": "string",
+          "description": "Reference text or source (ที่มาของตำรับ)."
+        },
+        "externalUse": {
+          "type": "boolean",
+          "description": "True if the formula is for external application only."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "englishName",
+        "category",
+        "tasteProfile",
+        "indications",
+        "ingredientsSummary",
+        "preparationAndDosage",
+        "precautions",
+        "referenceSource",
+        "externalUse",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "FormulaBookmark": {
+      "title": "FormulaBookmark",
+      "description": "User bookmark and personal usage notes for a standard or custom Thai herbal formula.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "formulaId": {
+          "type": "string",
+          "description": "ID of the bookmarked formula."
+        },
+        "formulaName": {
+          "type": "string",
+          "description": "Display name of the bookmarked formula."
+        },
+        "personalNote": {
+          "type": "string",
+          "description": "Personal apothecary usage note."
+        },
+        "favorite": {
+          "type": "boolean",
+          "description": "Whether the formula is starred/pinned as a favorite."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "formulaId",
+        "formulaName",
+        "personalNote",
+        "favorite",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HerbRemedy": {
+      "title": "HerbRemedy",
+      "description": "Herbal remedy record containing properties, components, usage instructions, and precautions.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the herbal remedy."
+        },
+        "properties": {
+          "type": "string",
+          "description": "Therapeutic properties (สรรพคุณ)."
+        },
+        "components": {
+          "type": "string",
+          "description": "Active herbal components and ingredients (ส่วนประกอบ)."
+        },
+        "instructions": {
+          "type": "string",
+          "description": "Preparation and dosage instructions (วิธีใช้)."
+        },
+        "precautions": {
+          "type": "string",
+          "description": "Contraindications and safety precautions (ข้อควรระวัง)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last update (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "name",
+        "properties",
+        "components",
+        "instructions",
+        "precautions",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/formulas/{formulaId}": {
+      "schema": {
+        "$ref": "#/entities/HerbalFormula"
+      },
+      "description": "User's personal Thai herbal medicine formulas."
+    },
+    "/users/{userId}/bookmarks/{bookmarkId}": {
+      "schema": {
+        "$ref": "#/entities/FormulaBookmark"
+      },
+      "description": "User's bookmarked herbal formulas and personal notes."
+    },
+    "/users/{userId}/remedies/{remedyId}": {
+      "schema": {
+        "$ref": "#/entities/HerbRemedy"
+      },
+      "description": "User's structured HerbRemedy CRUD records."
+    }
+  }
+}

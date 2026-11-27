@@ -1,0 +1,6 @@
+{
+  "name": "คลังสมุนไพร",
+  "description": "ระบบคลังข้อมูลตำรับยาสมุนไพรไทย ค้นหาสูตรยา สรรพคุณ ส่วนประกอบ วิธีใช้ ข้อควรระวัง และบันทึกตำรับยาส่วนตัว",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

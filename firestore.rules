@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidHerbalFormula(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.englishName is string && data.englishName.size() <= 100 &&
+             data.category in ['RESPIRATORY', 'DIGESTIVE', 'FEVER', 'TONIC', 'MUSCLE', 'WOMENS_HEALTH', 'CUSTOM'] &&
+             data.tasteProfile is string && data.tasteProfile.size() <= 60 &&
+             data.indications is string && data.indications.size() >= 1 && data.indications.size() <= 600 &&
+             data.ingredientsSummary is string && data.ingredientsSummary.size() >= 1 && data.ingredientsSummary.size() <= 1000 &&
+             data.preparationAndDosage is string && data.preparationAndDosage.size() >= 1 && data.preparationAndDosage.size() <= 800 &&
+             data.precautions is string && data.precautions.size() <= 600 &&
+             data.referenceSource is string && data.referenceSource.size() <= 150 &&
+             data.externalUse is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidFormulaBookmark(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.formulaId is string && data.formulaId.size() >= 1 && data.formulaId.size() <= 128 &&
+             data.formulaName is string && data.formulaName.size() >= 1 && data.formulaName.size() <= 100 &&
+             data.personalNote is string && data.personalNote.size() <= 500 &&
+             data.favorite is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidHerbRemedy(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.properties is string && data.properties.size() >= 1 && data.properties.size() <= 800 &&
+             data.components is string && data.components.size() >= 1 && data.components.size() <= 1000 &&
+             data.instructions is string && data.instructions.size() >= 1 && data.instructions.size() <= 800 &&
+             data.precautions is string && data.precautions.size() <= 600 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/formulas/{formulaId} {
+      allow get: if isOwner(userId) && isValidId(formulaId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(formulaId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'name', 'englishName', 'category', 'tasteProfile',
+                         'indications', 'ingredientsSummary', 'preparationAndDosage',
+                         'precautions', 'referenceSource', 'externalUse', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'name', 'englishName', 'category', 'tasteProfile',
+                         'indications', 'ingredientsSummary', 'preparationAndDosage',
+                         'precautions', 'referenceSource', 'externalUse', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidHerbalFormula(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(formulaId) &&
+                       isValidHerbalFormula(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'englishName', 'category', 'tasteProfile',
+                         'indications', 'ingredientsSummary', 'preparationAndDosage',
+                         'precautions', 'referenceSource', 'externalUse', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(formulaId);
+    }
+
+    match /users/{userId}/bookmarks/{bookmarkId} {
+      allow get: if isOwner(userId) && isValidId(bookmarkId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(bookmarkId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'formulaId', 'formulaName', 'personalNote',
+                         'favorite', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'formulaId', 'formulaName', 'personalNote',
+                         'favorite', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidFormulaBookmark(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(bookmarkId) &&
+                       isValidFormulaBookmark(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().formulaId == existing().formulaId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'formulaName', 'personalNote', 'favorite', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(bookmarkId);
+    }
+
+    match /users/{userId}/remedies/{remedyId} {
+      allow get: if isOwner(userId) && isValidId(remedyId);
+      allow list: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidId(remedyId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'name', 'properties', 'components',
+                         'instructions', 'precautions', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'name', 'properties', 'components',
+                         'instructions', 'precautions', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidHerbRemedy(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(remedyId) &&
+                       isValidHerbRemedy(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'name', 'properties', 'components',
+                         'instructions', 'precautions', 'updatedAt'
+                       ]);
+
+      allow delete: if isOwner(userId) && isValidId(remedyId);
+    }
+  }
+}
